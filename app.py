@@ -11,60 +11,90 @@ with open('teachers.json', encoding='utf-8') as t:
     teachers = json.load(t)
 
 links = [{'title': 'Все репетиторы', 'link': '/'}, {'title': 'Заявка на подбор', 'link': '/request'}]
-days = {'mo': 'Понедельник', 'tu': 'Вторник', 'we': 'Среда', 'th': 'Четверг', 'fr': 'Пятница'}
+days = {'mo': 'Понедельник', 'tu': 'Вторник', 'we': 'Среда', 'th': 'Четверг', 'fr': 'Пятница', 'sa': 'Суббота', 'su': 'Воскресенье'}
 
 app = Flask(__name__)
 
+
+# Database section
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tinysteps.db'
 db = SQLAlchemy(app)
 
+# Database - Models
+teachers_goals = db.Table('teachers_goals',
+                                      db.Column('teacher_id', db.Integer, db.ForeignKey('db_teachers.id')),
+                                      db.Column('goal_id', db.Integer, db.ForeignKey('db_goals.id')))
+
+
 class Goal(db.Model):
-    __tablename__ = 'goals'
+    __tablename__ = 'db_goals'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True, nullable=False)
+    name_en = db.Column(db.String, nullable=False)
+    name_ru = db.Column(db.String, nullable=False)
     teachers = db.relationship('Teacher',
-                               secondary=teachers_goals_association,
+                               secondary=teachers_goals,
                                back_populates='goals')
 
 class Teacher(db.Model):
-    __tablename__ = 'teachers'
-    id = db.Column(db.Integer, primery_key=True)
+    __tablename__ = 'db_teachers'
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True, nullable=False)
     about = db.Column(db.String, nullable=False)
     rating = db.Column(db.Float, nullable=False)
     price = db.Column(db.Float, nullable=False)
     goals = db.relationship('Goal',
-                            secondary=teachers_goals_association,
+                            secondary=teachers_goals,
                             back_populates='teachers')
     free = db.Column(db.String, nullable=False)
     bookings = db.relationship('Booking',
-                               db.ForeignKey('bookings.id'),
-                               back_populates='teacher_id')
-
-teachers_goals_association = db.Table('teacher_has_goal',
-                                      db.Column('teacher_id', db.Integer, db.ForeignKey('teachers.id')),
-                                      db.Column('goal_id', db.Integer, db.ForeignKey('goals.id')))
+                               back_populates='teacher')
 
 class Booking(db.Model):
-    __tablename__ = 'bookings'
+    __tablename__ = 'db_bookings'
     id = db.Column(db.Integer, primary_key=True)
-    teacher_id = db.relationship('teachers',
-                                 db.ForeignKey('teachers.id'),
-                                 back_populates='bookings')
+    teacher_id = db.Column(db.Integer, db.ForeignKey('db_teachers.id'))
+    teacher = db.relationship('Teacher', back_populates='bookings')
     day = db.Column(db.String)
     time = db.Column(db.Time)
     name = db.Column(db.String)
     phone = db.Column(db.String)
 
+
 class Request(db.Model):
-    __tablename__ = 'requests'
+    __tablename__ = 'db_requests'
     id = db.Column(db.Integer, primary_key=True)
-    goal = db.Column(db.Integer, db.ForeingKey('goals.id'))
+    goal = db.Column(db.Integer, db.ForeignKey('db_goals.id'))
     time = db.Column(db.String)
     name = db.Column(db.String)
     phone = db.Column(db.String)
 
 
+db.create_all()
+
+
+# Database - Populating tables
+for goal in all_goals:
+    if db.session.query(Goal).filter(Goal.name_en == goal).count() < 1:
+        goal_for_db = Goal(name_en=goal, name_ru=all_goals[goal])
+        db.session.add(goal_for_db)
+
+
+for teacher in teachers:
+    if db.session.query(Teacher).filter(Teacher.id == int(teacher)).count() < 1:
+        teacher_for_db = Teacher(id=int(teacher),
+                                 name=teachers[teacher]['name'],
+                                 about=teachers[teacher]['about'],
+                                 rating=teachers[teacher]['rating'],
+                                 price=teachers[teacher]['price'],
+                                 free=str(teachers[teacher]['free']))
+        db.session.add(teacher_for_db)
+        for goal in teachers[teacher]['goals']:
+            goal_for_db = db.session.query(Goal).filter(Goal.name_en == goal).first()
+            teacher_for_db.goals.append(goal_for_db)
+
+db.session.commit()
+
+# Routes section
 @app.route('/')
 def main():
     output = render_template('index.html',
