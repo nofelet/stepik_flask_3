@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block container %}
+    
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="/">TINYSTEPS</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            {% for link in links %}
+                <li class="nav-item {% if request.path == link.link %}active{% endif %}">
+                    <a class="nav-link" href="{{ link.link }}">{{ link.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <span class="navbar-text">
+        ☺️
+    </span>
+</nav>
+
+
+<div class="row mt-5">
+  <div class="col-6 offset-3">
+    <form action="/profiles/{{ id }}" class="card mb-3" >
+
+
+      <div class="card-body text-center pt-5">
+        <img src="../static/pict {{ id }}.png" class="mb-3" width="95" alt="">
+        <h5 class="card-title mt-2 mb-2">{{ teachers[id]['name'] }}</h5>
+        <p class="my-1">Отправить сообщение</p>
+      </div>
+
+
+      <hr/>
+
+      <div class="card-body mx-3">
+
+        <p class="mb-1 mt-2">Вас зовут</p>
+        <input class="form-control" type="text" placeholder="Екатерина">
+
+        <p class="mb-1 mt-2">Ваш телефон</p>
+        <input class="form-control" type="text" placeholder="+71234567890">
+
+        <p class="mb-1 mt-2">Сообщение</p>
+        <input class="form-control" type="text" placeholder="">
+
+        <input type="submit" class="btn btn-primary btn-block mt-4" value="Записаться на пробный урок">
+
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

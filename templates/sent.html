@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block container %}
+    
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="/">TINYSTEPS</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            {% for link in links %}
+                <li class="nav-item {% if request.path == link.link %}active{% endif %}">
+                    <a class="nav-link" href="{{ link.link }}">{{ link.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <span class="navbar-text">
+        ☺️
+    </span>
+</nav>
+
+    <!-- HERO -->
+
+
+
+<div class="row mt-5">
+  <div class="col-6 offset-3">
+    <div class="card mb-3" >
+
+
+      <div class="card-body text-center pt-5">
+        <img src="../static/check.png" class="mb-3" width="65" alt="">
+        <h3 class="card-title mt-4 mb-2">Отправлено!</h3>
+        <p>Скоро мы вам перезвоним</p>
+      </div>
+
+      <hr/>
+
+      <div class="card-body mx-5">
+        <p><b>Тема:</b> Пробный урок</p>
+        <p><b>Дата:</b> {{ day }}, {{ time }}</p>
+        <p><b>Имя:</b> {{ name }}</p>
+        <p><b>Телефон:</b> {{ phone }}</p>
+      </div>
+
+
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
