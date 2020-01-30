@@ -13,8 +13,8 @@ with open('teachers.json', encoding='utf-8') as t:
 links = [{'title': 'Все репетиторы', 'link': '/'}, {'title': 'Заявка на подбор', 'link': '/request'}]
 days = {'mo': 'Понедельник', 'tu': 'Вторник', 'we': 'Среда', 'th': 'Четверг', 'fr': 'Пятница', 'sa': 'Суббота', 'su': 'Воскресенье'}
 
-app = Flask(__name__)
 
+app = Flask(__name__)
 
 # Database section
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tinysteps.db'
@@ -94,6 +94,7 @@ for teacher in teachers:
 
 db.session.commit()
 
+
 # Routes section
 @app.route('/')
 def main():
@@ -121,13 +122,22 @@ def goals(goal):
                              goal_ru=goal_ru)
     return output
 
-@app.route('/profiles/<id>/')
+@app.route('/profiles/<int:id>/')
 def profiles(id):
+    goals = []
+    this_teacher = db.session.query(Teacher).filter(Teacher.id == id).first()
+    for goal in this_teacher.goals:
+        goals.append(goal.name_ru)
+    name = this_teacher.name
+    teacher = {'id': str(id),
+               'name': this_teacher.name,
+               'goals': goals,
+               'rating': this_teacher.rating,
+               'price': this_teacher.price,
+               'about': this_teacher.about}
     output = render_template('profile.html',
                              links=links,
-                             goals=all_goals,
-                             teacher=teachers[id],
-                             id=id)
+                             teacher=teacher)
     return output
 
 @app.route('/search?s=aaaa')
@@ -181,4 +191,4 @@ def sent():
     return output
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
