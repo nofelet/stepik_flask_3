@@ -128,7 +128,6 @@ def profiles(id):
     this_teacher = db.session.query(Teacher).filter(Teacher.id == id).first()
     for goal in this_teacher.goals:
         goals.append(goal.name_ru)
-    name = this_teacher.name
     teacher = {'id': str(id),
                'name': this_teacher.name,
                'goals': goals,
