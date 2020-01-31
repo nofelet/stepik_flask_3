@@ -119,19 +119,24 @@ def main():
 
 @app.route('/goals/<goal>/')
 def goals(goal):
-    goal_ru = all_goals[goal].lower()
+    goal_from_db = db.session.query(Goal).filter(Goal.name_en == goal).first()
+    goal_ru_from_db = goal_from_db.name_ru.lower()
+    # For some reason, db.in_() is not working, therefore filtering by goal in teacher.goals is done manually.
     teachers_with_goal = []
-    for teacher_id in teachers:
-        if goal in teachers[teacher_id]['goals']:
-            teachers_with_goal.append(teacher_id)
-    teachers_with_goal.sort(key=lambda teacher_id: teachers[teacher_id]['rating'], reverse=True)
-
+    all_teachers = db.session.query(Teacher).all()
+    for this_teacher in all_teachers:
+        if goal_from_db in this_teacher.goals:
+            # .__dict__ is also not working, so dictionary is also done manually.
+            teachers_with_goal.append({'id': str(this_teacher.id),
+                                       'name': this_teacher.name,
+                                       'rating': this_teacher.rating,
+                                       'price': this_teacher.price,
+                                       'about': this_teacher.about})
     output = render_template('goal.html',
                              links=links,
                              teachers_with_goal=teachers_with_goal,
-                             teachers=teachers,
                              goal=goal,
-                             goal_ru=goal_ru)
+                             goal_ru=goal_ru_from_db)
     return output
 
 @app.route('/profiles/<int:id>/')

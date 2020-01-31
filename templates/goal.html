@@ -25,18 +25,17 @@
  <h2 class="h1 text-center w-50 mx-auto mt-1 py-5 mb-4"><strong>🚜<br/>Преподаватели <br/>  {{ goal_ru }}</strong></h2>
 
 <div class="w-75 m-auto">
-    {% for id in teachers_with_goal %}
-
+    {% for teacher in teachers_with_goal %}
         <div class="card mb-4">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-3"><img src="/static/pict {{ id }}.png" class="img-fluid"></div>
+                    <div class="col-3"><img src="/static/pict {{ teacher.id }}.png" class="img-fluid"></div>
                     <div class="col-9">
-                        <p class="float-right">Рейтинг: {{ teachers[id]['rating'] }} Ставка: {{ teachers[id]['price'] }} / час</p>
-                        <h5>{{ teachers[id]['name'] }}</h5>
-                        <p>{{ teachers[id]['about']|truncate(300) }}</p>
-                        <a href="/profiles/{{ id }}" class="btn btn-primary btn-sm mr-3">Записаться на пробный урок</a>
-                        <a href="/message/{{ id }}" class="btn btn-outline-primary btn-sm">Отправить сообщение</a>
+                        <p class="float-right">Рейтинг: {{ teacher.rating }} Ставка: {{ teacher.price }} / час</p>
+                        <h5>{{ teacher.name }}</h5>
+                        <p>{{ teacher.about|truncate(300) }}</p>
+                        <a href="/profiles/{{ teacher.id }}" class="btn btn-primary btn-sm mr-3">Записаться на пробный урок</a>
+                        <a href="/message/{{ teacher.id }}" class="btn btn-outline-primary btn-sm">Отправить сообщение</a>
                     </div>
                 </div>
             </div>
