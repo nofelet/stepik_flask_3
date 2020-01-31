@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 import json
 
+from random import shuffle
+
 with open('goals.json', encoding='utf-8') as g:
     all_goals = json.load(g)
 
@@ -110,10 +112,28 @@ db.session.commit()
 # Routes section
 @app.route('/')
 def main():
+    all_goals = []
+    teachers_for_index = []
+    # Dictionaries are added to all_goals and all_teachers manually because .__dict__ is not working for some reason.
+    goals_from_db = db.session.query(Goal).all()
+    for goal in goals_from_db:
+        all_goals.append({'name_en': goal.name_en, 'name_ru': goal.name_ru})
+
+    teachers_from_db = db.session.query(Teacher).all()
+    shuffle(teachers_from_db)
+    six_random_teachers = teachers_from_db[:6]
+
+    for teacher in six_random_teachers:
+        teachers_for_index.append({'id': str(teacher.id),
+                                   'name': teacher.name,
+                                   'rating': teacher.rating,
+                                   'price': teacher.price,
+                                   'about': teacher.about})
+
     output = render_template('index.html',
                              links=links,
-                             teachers=teachers,
-                             teacher_ids=[])
+                             goals=all_goals,
+                             teachers=teachers_for_index)
     return output
 
 

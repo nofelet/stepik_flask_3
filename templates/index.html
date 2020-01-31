@@ -25,6 +25,7 @@
 <h2 class="h1 text-center w-50 mx-auto mt-4 py-5"><strong>Найдите идеального репетитора английского, занимайтесь онлайн</strong></h2>
 
 <div class="text-center mb-5">
+    <!-- Could have done this in cycle from goals, but have no idea what to do with these pictograms-->
     <div class="btn-group mx-auto mb-0" role="group" aria-label="Basic example">
         <a href="/goals/travel" type="button" class="btn btn-outline-secondary">⛱Для путешествий</button>
         <a href="/goals/study" type="button" class="btn btn-outline-secondary">🏫 Для школы</button>
@@ -35,31 +36,22 @@
 
 <h5 class="text-center mb-5">Свободны прямо сейчас</h5>
 
-{% for teacher in teachers %}
-    {% set teacher_ids = teacher_ids.append(teacher) %}
-{% endfor %}
-
 <div class="w-75 m-auto">
-    {% for _ in range(6) %}
-        {% set id = teacher_ids|random %}
-        {% set id_idx = teacher_ids.index(id) %}
-
+    {% for teacher in teachers %}
         <div class="card mb-4">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-3"><img src="/static/pict {{ id }}.png" class="img-fluid"></div>
+                    <div class="col-3"><img src="/static/pict {{ teacher.id }}.png" class="img-fluid"></div>
                     <div class="col-9">
-                        <p class="float-right">Рейтинг: {{ teachers[id]['rating'] }} Ставка: {{ teachers[id]['price'] }} / час</p>
-                        <h5>{{ teachers[id]['name'] }}</h5>
-                        <p>{{ teachers[id]['about']|truncate(300) }}</p>
-                        <a href="/profiles/{{ id }}" class="btn btn-primary btn-sm mr-3">Записаться на пробный урок</a>
-                        <a href="/message/{{ id }}" class="btn btn-outline-primary btn-sm">Отправить сообщение</a>
+                        <p class="float-right">Рейтинг: {{ teacher.rating }} Ставка: {{ teacher.price }} / час</p>
+                        <h5>{{ teacher.name }}</h5>
+                        <p>{{ teacher.about|truncate(300) }}</p>
+                        <a href="/profiles/{{ teacher.id }}" class="btn btn-primary btn-sm mr-3">Записаться на пробный урок</a>
+                        <a href="/message/{{ teacher.id }}" class="btn btn-outline-primary btn-sm">Отправить сообщение</a>
                     </div>
                 </div>
             </div>
         </div>
-
-        {% set teacher_ids = teacher_ids.pop(id_idx) %}
     {% endfor %}
 </div>
 
