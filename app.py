@@ -140,6 +140,8 @@ def profiles(id):
     teacher = db.session.query(Teacher).filter(Teacher.id == id).first()
     for goal in teacher.goals:
         profile_goals.append(goal.name_ru)
+    # For some reason, json.dumps makes it Python dict string rather than JSON string.
+    # Therefore, json.loads does not work (expects double quotes), but eval does.
     free = eval(teacher.free)
 
     output = render_template('profile.html',
