@@ -81,12 +81,13 @@ for goal in all_goals:
 
 for teacher in teachers:
     if db.session.query(Teacher).filter(Teacher.id == int(teacher)).count() < 1:
+        free = json.dumps(teachers[teacher]['free'])
         teacher_for_db = Teacher(id=int(teacher),
                                  name=teachers[teacher]['name'],
                                  about=teachers[teacher]['about'],
                                  rating=teachers[teacher]['rating'],
                                  price=teachers[teacher]['price'],
-                                 free=str(teachers[teacher]['free']))
+                                 free=free)
         db.session.add(teacher_for_db)
         for goal in teachers[teacher]['goals']:
             goal_for_db = db.session.query(Goal).filter(Goal.name_en == goal).first()
@@ -124,19 +125,18 @@ def goals(goal):
 
 @app.route('/profiles/<int:id>/')
 def profiles(id):
-    goals = []
-    this_teacher = db.session.query(Teacher).filter(Teacher.id == id).first()
-    for goal in this_teacher.goals:
-        goals.append(goal.name_ru)
-    teacher = {'id': str(id),
-               'name': this_teacher.name,
-               'goals': goals,
-               'rating': this_teacher.rating,
-               'price': this_teacher.price,
-               'about': this_teacher.about}
+    profile_goals = []
+    teacher = db.session.query(Teacher).filter(Teacher.id == id).first()
+    for goal in teacher.goals:
+        profile_goals.append(goal.name_ru)
+    free = eval(teacher.free)
+
     output = render_template('profile.html',
                              links=links,
-                             teacher=teacher)
+                             teacher=teacher,
+                             id=str(teacher.id),
+                             goals=profile_goals,
+                             free=free)
     return output
 
 @app.route('/search?s=aaaa')
