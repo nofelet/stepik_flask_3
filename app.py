@@ -11,7 +11,8 @@ with open('teachers.json', encoding='utf-8') as t:
     teachers = json.load(t)
 
 links = [{'title': 'Все репетиторы', 'link': '/'}, {'title': 'Заявка на подбор', 'link': '/request'}]
-days = {'mo': 'Понедельник', 'tu': 'Вторник', 'we': 'Среда', 'th': 'Четверг', 'fr': 'Пятница', 'sa': 'Суббота', 'su': 'Воскресенье'}
+days = {'mon': 'Понедельник', 'tue': 'Вторник', 'wed': 'Среда', 'thu': 'Четверг', 'fri': 'Пятница'}
+times = {'8': '8:00', '10': '10:00', '12': '12:00', '14': '14:00', '16': '16:00'}
 
 
 app = Flask(__name__)
@@ -49,6 +50,12 @@ class Teacher(db.Model):
     bookings = db.relationship('Booking',
                                back_populates='teacher')
 
+class Days(db.Model):
+    ___tablename__ = 'db_days'
+    id = db.Column(db.Integer, primary_key=True)
+    day_en = db.Column(db.String, unique=True, nullable=False)
+    day_ru = db.Column(db.String, unique=True, nullable=False)
+
 class Booking(db.Model):
     __tablename__ = 'db_bookings'
     id = db.Column(db.Integer, primary_key=True)
@@ -74,12 +81,14 @@ db.create_all()
 
 # Database - Populating tables
 for goal in all_goals:
+    # without this check, "UNIQUE constraing failed" error comes out.
     if db.session.query(Goal).filter(Goal.name_en == goal).count() < 1:
         goal_for_db = Goal(name_en=goal, name_ru=all_goals[goal])
         db.session.add(goal_for_db)
 
 
 for teacher in teachers:
+    # without this check, "UNIQUE constraing failed" error comes out.
     if db.session.query(Teacher).filter(Teacher.id == int(teacher)).count() < 1:
         free = json.dumps(teachers[teacher]['free'])
         teacher_for_db = Teacher(id=int(teacher),
@@ -92,6 +101,8 @@ for teacher in teachers:
         for goal in teachers[teacher]['goals']:
             goal_for_db = db.session.query(Goal).filter(Goal.name_en == goal).first()
             teacher_for_db.goals.append(goal_for_db)
+
+
 
 db.session.commit()
 
@@ -136,7 +147,9 @@ def profiles(id):
                              teacher=teacher,
                              id=str(teacher.id),
                              goals=profile_goals,
-                             free=free)
+                             free=free,
+                             days=days,
+                             times=times)
     return output
 
 @app.route('/search?s=aaaa')
