@@ -114,11 +114,14 @@ db.session.commit()
 def main():
     all_goals = []
     teachers_for_index = []
+
     # Dictionaries are added to all_goals and all_teachers manually because .__dict__ is not working for some reason.
+    # And, I could not access sqlalchemy model objects from templates, therefore lists and dictionaries.
     goals_from_db = db.session.query(Goal).all()
     for goal in goals_from_db:
         all_goals.append({'name_en': goal.name_en, 'name_ru': goal.name_ru})
 
+    # Could not use func.random() from sqlalchemy, therefore shuffle() from python.
     teachers_from_db = db.session.query(Teacher).all()
     shuffle(teachers_from_db)
     six_random_teachers = teachers_from_db[:6]
