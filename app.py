@@ -2,6 +2,9 @@ from flask import Flask, render_template, request
 
 from flask_sqlalchemy import SQLAlchemy
 
+from flask_wtf import FlaskForm
+from wtforms import StringField, RadioField, validators
+
 import json
 
 from random import shuffle
@@ -18,6 +21,8 @@ times = {'8': '8:00', '10': '10:00', '12': '12:00', '14': '14:00', '16': '16:00'
 
 
 app = Flask(__name__)
+
+app.secret_key = 'some-very-secret-key'
 
 # Database section
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tinysteps.db'
@@ -52,31 +57,15 @@ class Teacher(db.Model):
     bookings = db.relationship('Booking',
                                back_populates='teacher')
 
-class Days(db.Model):
-    ___tablename__ = 'db_days'
-    id = db.Column(db.Integer, primary_key=True)
-    day_en = db.Column(db.String, unique=True, nullable=False)
-    day_ru = db.Column(db.String, unique=True, nullable=False)
-
 class Booking(db.Model):
     __tablename__ = 'db_bookings'
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('db_teachers.id'))
     teacher = db.relationship('Teacher', back_populates='bookings')
     day = db.Column(db.String)
-    time = db.Column(db.Time)
-    name = db.Column(db.String)
-    phone = db.Column(db.String)
-
-
-class Request(db.Model):
-    __tablename__ = 'db_requests'
-    id = db.Column(db.Integer, primary_key=True)
-    goal = db.Column(db.Integer, db.ForeignKey('db_goals.id'))
     time = db.Column(db.String)
     name = db.Column(db.String)
     phone = db.Column(db.String)
-
 
 db.create_all()
 
@@ -108,6 +97,28 @@ for teacher in teachers:
 
 db.session.commit()
 
+
+# Forms section
+class BookingForm(FlaskForm):
+    name = StringField('Вас зовут', validators=[validators.input_required()])
+    phone = StringField('Ваш телефон', validators=[validators.input_required()])
+
+class MessageForm(FlaskForm):
+    name = StringField('Васс зовут', validators=[validators.input_required()])
+    phone = StringField('Ваш телефон', validators=[validators.input_required()])
+    message = StringField('сообщение', validators=[validators.input_required()])
+
+class RequestForm(FlaskForm):
+    goal = RadioField('Какая цель заниятий?', choices=[("travel", "Для путешествий"),
+                                                       ("study", "Для учебы"),
+                                                       ("work", "Для работы"),
+                                                       ("relocate", "Для переезда")])
+    duration = RadioField('Сколько времени есть?', choices=[("1-2", "1-2 часа в неделю"),
+                                                            ("3-5", "3-5 часов в неделю"),
+                                                            ("5-7", "5-7 часов в неделю"),
+                                                            ("7-9", "7-9 часов в неделю")])
+    name = StringField('Вас зовут', validators=[validators.input_required()])
+    phone = StringField('Ваш телефон', validators=[validators.input_required()])
 
 # Routes section
 @app.route('/')
@@ -188,29 +199,46 @@ def search():
 
 @app.route('/request')
 def reqs():
+
+    form = RequestForm()
+
     output = render_template('pick.html',
-                             links=links)
+                             links=links,
+                             form=form)
     return output
 
-@app.route('/booking/<id>/<day>/<time>')
+@app.route('/booking/<id>/<day>/<time>', methods=['GET'])
 def booking(id, day, time):
     with open ('request.json', 'w', encoding='utf-8') as r:
-        json.dump({'day': days[day], 'time': time+':00'}, r)
+        json.dump({'day': days[day], 'time': times[time]}, r)
+
+    teacher_from_db = db.session.query(Teacher).filter(Teacher.id == int(id)).first()
+    teacher_for_booking = {'id': id,
+                           'name': teacher_from_db.name}
+
+    form = BookingForm()
+
     output = render_template('booking.html',
                              links=links,
-                             teacher=teachers[id],
-                             days=days,
-                             id=id,
-                             day=day,
-                             time=time)
+                             teacher=teacher_for_booking,
+                             form=form,
+                             day_ru=days[day],
+                             time=times[time])
     return output
 
 @app.route('/message/<id>')
 def message(id):
+
+    teacher_from_db = db.session.query(Teacher).filter(Teacher.id == int(id)).first()
+    teacher_for_message = {'id': str(teacher_from_db.id),
+                           'name': teacher_from_db.name}
+
+    form = MessageForm()
+
     output = render_template('message.html',
                              links=links,
-                             id=id,
-                             teachers=teachers)
+                             teacher=teacher_for_message,
+                             form=form)
     return output
 
 @app.route('/sent/', methods=['GET'])
@@ -233,4 +261,4 @@ def sent():
     return output
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

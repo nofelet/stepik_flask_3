@@ -36,59 +36,33 @@
 
         <div class="row">
           <div class="col">
-
-            <p>Какая цель занятий?</p>
-
-            <div class="form-check ">
-              <input type="radio" class="form-check-input" name="goal" value="travel"> Для путешествий
-            </div>
-            <div class="form-check ">
-              <input type="radio" class="form-check-input" name="goal" value="learn"> Для школы
-            </div>
-            <div class="form-check ">
-              <input type="radio" class="form-check-input" name="goal" value="work"> Для работы
-            </div>
-            <div class="form-check ">
-              <input type="radio" class="form-check-input"name="goal" value="move"> Для переезда
-            </div>
-
+            <p>{{ form.goal.label }}</p>       
+              {{ form.goal(class="form-check") }}
           </div>
 
           <div class="col">
-
-            <p>Сколько времени есть?</p>
-
-            <div class="form-check ">
-              <input type="radio" class="form-check-input" name="time" value="1-2"> 1-2 часа в неделю
-            </div>
-            <div class="form-check ">
-              <input type="radio"class="form-check-input" name="time" value="3-5"> 3-5 часов в неделю
-            </div>
-            <div class="form-check ">
-              <input type="radio" class="form-check-input"name="time" value="5-7"> 5-7 часов в неделю
-            </div>
-            <div class="form-check ">
-              <input type="radio" class="form-check-input"name="time" value="7-10"> 7-10 часов в неделю
-            </div>
-
-
+            <p>{{ form.duration.label }}</p>
+            {{ form.duration(class="form-check-input") }}
           </div>
         </div>
       </div>
 
       <hr>
 
-      <div class="card-body mx-3">
 
-        <p class="mb-1 mt-2">Вас зовут</p>
-        <input class="form-control" type="text" placeholder="Василий">
 
-        <p class="mb-1 mt-2">Ваш телефон</p>
-        <input class="form-control" type="text" placeholder="+71234567890">
+        <div class="card-body mx-3">
 
-        <input type="submit" class="btn btn-primary mt-4" value="Найдите мне преподавателя">
+          <p class="mb-1 mt-2">{{ form.name.label }}</p>
+          {{ form.name(class="form-control", placeholder="Василий") }}
 
-      </div>
+
+          <p class="mb-1 mt-2">{{ form.phone.label }}</p>
+          {{ form.phone(class="from-control", placeholder="+71234567890") }}
+
+          <input type="submit" class="btn btn-primary mt-4" value="Найдите мне преподавателя">
+
+        </div>
 
     </form>
 
